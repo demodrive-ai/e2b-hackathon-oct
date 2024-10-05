@@ -45,11 +45,12 @@ Look at the description of the code recipe you need to extract below.
 
 1. The code should be self-contained and run end to end in the same file. You may have to intelligently piece things together here.
 3. The code file should not have anything but code. No commands like pip install, npm install, etc.
-4. If it is a python project then it shoudl have requirements.txt, .env for environment variables, main.py for all the self-contained code and command to run the project.
-5. If it is a javascript/typescript project then it should have package.json, .env for environment variables, index.js for all the self-contained code and command to run the project.
+4. .env files should have all the important keys in it. Sometimes the keys are implicit in the code and not mentioned explicitly. If you think it will be helpful to have a env variable then add it. better safe than sorry.
+5. For all python recipes it should have requirements.txt, .env for environment variables, main.py for all the self-contained code and command to run the project. Carefully make sure the requirements.txt and .env are complete. Somethings this can be tricky.
+6. If it is a javascript/typescript project then it should have package.json, .env for environment variables, index.js for all the self-contained code and command to run the project.
+7. Review all the code files in the recipes to make sure nothing is missing wholistically.
 
-
-## Blog post:
+# Blog post:
 
 {blog_post}
 """)

@@ -22,10 +22,22 @@ class CodeFile(BaseModel):
     language: LanguageEnum = Field(
         ..., description="The language of the file."
     )
+    
+class CodeRecipeDescription(BaseModel):
+    title: str = Field(..., description="The title of the Code Recipe")
+    description: str = Field(..., description="Short description of the code recipe which is information dense, succinct and captures as much detail as possible in fewest words.")
 
+    def __str__(self):
+        return f"### {self.title}\n\n{self.description}"
 
-class BlogCodeProject(BaseModel):
-    title: str = Field(..., description="The title of the technical blog post.")
+class CodeRecipeDescriptions(BaseModel):
+    recipes: List[CodeRecipeDescription] = Field(..., description="All the code recipes in the technical blog post")
+
+    def __str__(self):
+        return "\n\n".join(str(recipe) for recipe in self.recipes)
+
+class BlogCodeRecipe(BaseModel):
+    title: str = Field(..., description="The title of an individual code recipe")
     published_at: datetime = Field(
         ..., description="The published at of the technical blog post."
     )

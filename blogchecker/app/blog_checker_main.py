@@ -94,9 +94,13 @@ def update_env_file(blog_code_recipe: BlogCodeRecipeLLM, env_content: str) -> No
         blog_code_recipe (BlogCodeRecipe): The blog code recipe containing the .env file.
         env_content (str): The environment content to update the .env file with.
     """
-    env_dict: Dict[str, str] = dict(
-        line.split("=") for line in env_content.strip().split("\n")
-    )
+    env_dict: Dict[str, str] = {}
+    for line in env_content.strip().split("\n"):
+        if "=" in line:
+            key, value = line.split("=", 1)
+            env_dict[key.strip()] = value.strip()
+        else:
+            logger.warning(f"Skipping invalid env line: {line}")
 
     for code_file in blog_code_recipe.code:
         if code_file.filepath == ".env":
@@ -161,6 +165,20 @@ def get_blog_code_recipes_with_ai(blog_post_content: str) -> List[BlogCodeRecipe
     return code_details
 
 
+def get_env_keys_as_string(env_file_path: str) -> str:
+    """Get the content of a .env file and return it as a string.
+
+    Args:
+        env_file_path (str): The path to the .env file.
+
+    Returns:
+        str: The content of the .env file as a string.
+    """
+    with open(env_file_path, "r") as file:
+        env_content = file.read()
+    return env_content
+
+
 def check_code_recipe_with_e2b(
     input_code_recipe: BlogCodeRecipeLLM, env_content: str
 ) -> None:
@@ -173,6 +191,7 @@ def check_code_recipe_with_e2b(
     update_env_file(input_code_recipe, env_content)
     logger.info(f"Running code project: {input_code_recipe.title}")
     result = run_code_project(input_code_recipe)
-    logger.info(f"Exit Code: {result.exit_code}")
-    logger.info(f"Standard Output: {result.stdout}")
-    logger.info(f"Standard Error: {result.stderr}")
+    # logger.info(f"Exit Code: {result.exit_code}")
+    # logger.info(f"Standard Output: {result.stdout}")
+    # logger.info(f"Standard Error: {result.stderr}")
+    return result

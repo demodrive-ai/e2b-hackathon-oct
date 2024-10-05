@@ -31,6 +31,8 @@ firecrawl-py = "^1.2.4"
 django = "^5.1.1"
 django-environ = "^0.11.2"
 pytest = "^8.3.3"
+jq = "^1.8.0"
+tdqm = "^0.0.1"
 
 
 [build-system]

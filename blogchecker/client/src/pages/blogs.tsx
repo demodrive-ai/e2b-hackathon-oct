@@ -25,7 +25,6 @@ import {
   LoadingToast,
 } from "@/components/CustomToast";
 import LeftSidebar from "@/sidebar";
-import { useNavigate } from "react-router-dom";
 
 export interface BlogPost {
   id: string;
@@ -140,9 +139,9 @@ export default function BlogPosts() {
     }
   };
 
-  const handleCompare = (postId: string) => {
-    console.log("handleCompare called with postId:", postId);
-    window.location.href = `/comparison/${postId}`;
+  const viewResults = (postId: string) => {
+    console.log("viewResults called with postId:", postId);
+    window.location.href = `/blogs/${postId}`;
   };
 
   const fetchAnalysisStatus = async (postId: string) => {
@@ -299,10 +298,10 @@ export default function BlogPosts() {
                       {analyzedPosts[post.id] ? (
                         <Button
                           variant="outline"
-                          onClick={() => handleCompare(post.id)}
+                          onClick={() => viewResults(post.id)}
                         >
                           <GitCompare className="w-4 h-4 mr-2" />
-                          Compare
+                          Results
                         </Button>
                       ) : (
                         <Button

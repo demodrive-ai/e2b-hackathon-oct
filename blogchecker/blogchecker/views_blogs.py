@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from .models import Blog, E2BRunOutput
+from .models import Blog
 from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -50,15 +50,15 @@ class BlogViewSet(viewsets.ModelViewSet):
             ],
         )
 
-        E2BRunOutput.objects.get_or_create(
-            title=code_recipe.title,
-            published_at=code_recipe.published_at,
-            description=code_recipe.description,
-            language=code_recipe.language,
-            success_criteria=code_recipe.success_criteria,
-            entrypoint=code_recipe.entrypoint,
-            code=code_recipe.code,
-        )
+        # E2BRunOutput.objects.get_or_create(
+        #     title=code_recipe.title,
+        #     published_at=code_recipe.published_at,
+        #     description=code_recipe.description,
+        #     language=code_recipe.language,
+        #     success_criteria=code_recipe.success_criteria,
+        #     entrypoint=code_recipe.entrypoint,
+        #     code=code_recipe.code,
+        # )
         output = run_code_project(code_recipe)
 
         return Response({"status": "success", "output": output})

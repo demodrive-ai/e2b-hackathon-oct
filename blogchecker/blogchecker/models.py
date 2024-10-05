@@ -34,9 +34,9 @@ class BlogCodeRecipe(models.Model):
     code_content = JSONField()
     success_criteria = models.TextField()
     entrypoint = models.CharField(max_length=255)
-
-
-blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name="code_recipes")
+    blog = models.ForeignKey(
+        Blog, on_delete=models.CASCADE, related_name="code_recipes"
+    )
 
 
 class E2BRunOutput(models.Model):

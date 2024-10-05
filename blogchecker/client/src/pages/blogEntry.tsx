@@ -10,8 +10,6 @@ import {
   Loader2,
   CopyIcon,
   CheckIcon,
-  TwitterIcon,
-  GitCompare,
   Twitter,
   Megaphone,
   Mail,
@@ -26,21 +24,18 @@ import {
 } from "@/components/ui/card";
 import LeftSidebar from "@/sidebar";
 
-interface Release {
+interface BlogPost {
   id: string;
-  repo_name: string;
-  release_name: string;
-  release_body: string;
-  release_date: string;
-  release_url: string;
+  url: string;
+  title: string;
+  content: string;
+  created_at: string;
 }
 
-interface SemanticRelease {
+interface AnalyzedBlogPost {
   id: string;
-  header_image_url: string;
-  footer_image_url: string;
-  release_body: string;
-  release_summary: string;
+  improved_content: string;
+  summary: string;
   created_at: string;
 }
 
@@ -99,86 +94,72 @@ const components = {
 };
 
 export default function BlogEntry() {
-  console.log("ComparisonPage component rendered");
-  const [release, setRelease] = useState<Release | null>(null);
-  const [semanticRelease, setSemanticRelease] =
-    useState<SemanticRelease | null>(null);
+  console.log("BlogEntry component rendered");
+  const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
+  const [analyzedBlogPost, setAnalyzedBlogPost] =
+    useState<AnalyzedBlogPost | null>(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const params = useParams();
   const navigate = useNavigate();
 
-  console.log("ComparisonPage rendered, params:", params);
+  console.log("BlogEntry rendered, params:", params);
 
   useEffect(() => {
-    const fetchReleaseData = async () => {
+    const fetchBlogData = async () => {
       setLoading(true);
       setError(null);
-      console.log("Fetching release data for id:", params.id);
+      console.log("Fetching blog data for id:", params.id);
       try {
         const baseUrl = `${window.location.protocol}//${window.location.host}/api`;
         console.log("Base URL:", baseUrl);
 
-        const releaseResponse = await fetch(
-          `${baseUrl}/releases/${params.id}/`,
-          {
-            method: "GET",
-            credentials: "include",
-          },
-        );
-        console.log("Release response status:", releaseResponse.status);
+        const blogResponse = await fetch(`${baseUrl}/blogs/${params.id}/`, {
+          method: "GET",
+          credentials: "include",
+        });
+        console.log("Blog response status:", blogResponse.status);
 
-        if (!releaseResponse.ok) {
-          throw new Error("Failed to fetch release data");
+        if (!blogResponse.ok) {
+          throw new Error("Failed to fetch blog data");
         }
 
-        const releaseData = await releaseResponse.json();
-        console.log("Release data:", releaseData);
+        const blogData = await blogResponse.json();
+        console.log("Blog data:", blogData);
 
-        const semanticReleaseData = releaseData.semantic_release;
-        console.log("Semantic release data:", semanticReleaseData);
+        const analyzedBlogData = blogData.analyzed_blog_post;
+        console.log("Analyzed blog data:", analyzedBlogData);
 
-        setRelease(releaseData);
-        setSemanticRelease(semanticReleaseData);
+        setBlogPost(blogData);
+        setAnalyzedBlogPost(analyzedBlogData);
       } catch (error) {
-        console.error("Error fetching release data:", error);
-        setError("Failed to fetch release data. Please try again.");
+        console.error("Error fetching blog data:", error);
+        setError("Failed to fetch blog data. Please try again.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchReleaseData();
+    fetchBlogData();
   }, [params.id]);
 
   const copyToClipboard = () => {
-    if (semanticRelease) {
-      navigator.clipboard.writeText(semanticRelease.release_body);
+    if (analyzedBlogPost) {
+      navigator.clipboard.writeText(analyzedBlogPost.improved_content);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const shareOnTwitter = () => {
-    function formatImageUrl(url: string) {
-      const strippedUrl = url.replace(/\.[^/.]+$/, "");
-      const urlSegments = strippedUrl.split("/");
-      urlSegments[urlSegments.length - 1] =
-        "carbon-" + urlSegments[urlSegments.length - 1];
-
-      // Join the segments back together
-      return urlSegments.join("/");
-    }
-    if (semanticRelease) {
+    if (analyzedBlogPost && blogPost) {
       const tweetText = encodeURIComponent(
         removeMarkdown(
-          formatImageUrl(semanticRelease.footer_image_url) +
-            "\n" +
-            semanticRelease.release_summary.slice(0, 140),
+          `Check out this blog post: ${blogPost.title}\n${analyzedBlogPost.summary.slice(0, 140)}...`,
         ),
       );
-      const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
+      const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(blogPost.url)}`;
       window.open(tweetUrl, "_blank");
     }
   };
@@ -188,10 +169,10 @@ export default function BlogEntry() {
   };
 
   console.log(
-    "Current state - release:",
-    release,
-    "semanticRelease:",
-    semanticRelease,
+    "Current state - blogPost:",
+    blogPost,
+    "analyzedBlogPost:",
+    analyzedBlogPost,
     "loading:",
     loading,
     "error:",
@@ -232,8 +213,8 @@ export default function BlogEntry() {
     );
   }
 
-  if (!release || !semanticRelease) {
-    console.log("No release or semantic release data");
+  if (!blogPost || !analyzedBlogPost) {
+    console.log("No blog post or analyzed blog post data");
     return (
       <div className="flex container mx-auto py-10">
         <aside className="w-64 flex-shrink-0 h-full overflow-y-auto">
@@ -241,7 +222,7 @@ export default function BlogEntry() {
         </aside>
         <Card className="flex-grow">
           <CardContent>
-            <p>No release data available.</p>
+            <p>No blog data available.</p>
           </CardContent>
         </Card>
       </div>
@@ -257,11 +238,9 @@ export default function BlogEntry() {
         <div className="flex justify-between">
           <div className="flex justify-start">
             <CardHeader>
-              <CardTitle>
-                {release.repo_name} - {release.release_name}
-              </CardTitle>
+              <CardTitle>{blogPost.title}</CardTitle>
               <CardDescription>
-                Release Date: {new Date(release.release_date).toLocaleString()}
+                Published: {new Date(blogPost.created_at).toLocaleString()}
               </CardDescription>
             </CardHeader>
           </div>
@@ -287,12 +266,10 @@ export default function BlogEntry() {
               variant="outline"
               size="lg"
               className="mt-2 mr-2 text-accent hover:text-accent-foreground"
-              onClick={() =>
-                navigate(`/changelog?repo_name=${release.repo_name}`)
-              }
+              onClick={() => window.open(blogPost.url, "_blank")}
             >
               <Megaphone className="h-4 w-4 mr-2" />
-              Changelog
+              View Original
             </Button>
           </div>
         </div>
@@ -300,7 +277,7 @@ export default function BlogEntry() {
           <div className="flex space-x-4 h-[calc(100vh-300px)]">
             <div className="flex-1 flex flex-col">
               <h2 className="text-xl font-semibold mb-2 text-center">
-                Original
+                Original Content
               </h2>
               <Card className="flex-grow overflow-hidden">
                 <ScrollArea className="h-full p-4">
@@ -309,14 +286,14 @@ export default function BlogEntry() {
                     rehypePlugins={[rehypeRaw]}
                     components={components}
                   >
-                    {release.release_body}
+                    {blogPost.content}
                   </ReactMarkdown>
                 </ScrollArea>
               </Card>
             </div>
             <div className="flex-1 flex flex-col">
               <h2 className="text-xl font-semibold mb-2 text-center">
-                Improved
+                Improved Content
               </h2>
               <Card className="flex-grow overflow-hidden relative border border-primary">
                 <Button
@@ -337,7 +314,7 @@ export default function BlogEntry() {
                     rehypePlugins={[rehypeRaw]}
                     components={components}
                   >
-                    {semanticRelease.release_body}
+                    {analyzedBlogPost.improved_content}
                   </ReactMarkdown>
                 </ScrollArea>
               </Card>

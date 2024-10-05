@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import {
   Book,
   Box,
+  Settings,
   LogOut,
   MessageSquare,
   MoreVertical,
@@ -47,20 +48,20 @@ export default function LeftSidebar() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/collections"
-                  className="flex items-center rounded-lg p-2 text-base font-normal text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
-                  <Book className="h-6 w-6" />
-                  <span className="ml-3">Collections</span>
-                </Link>
-              </li>
-              <li>
-                <Link
                   to="/blogs"
                   className="flex items-center rounded-lg p-2 text-base font-normal text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   <Box className="h-6 w-6" />
-                  <span className="ml-3">blogs</span>
+                  <span className="ml-3">Blogs</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/environment"
+                  className="flex items-center rounded-lg p-2 text-base font-normal text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  <Settings className="h-6 w-6" />
+                  <span className="ml-3">Environment</span>
                 </Link>
               </li>
             </ul>

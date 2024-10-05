@@ -20,9 +20,11 @@ from django.shortcuts import render
 from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 from .views_blogs import BlogViewSet
+from .views_env import EnvironmentView
 
 router = DefaultRouter()
 router.register(r"blogs", BlogViewSet)
+# router.register(r"env", EnvironmentView)
 
 
 def app(request):
@@ -33,5 +35,6 @@ def app(request):
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
+    path("api/env/", EnvironmentView.as_view(), name="env"),
     re_path(r"^(?!admin/|auth|callback|logout|api/).*", app, name="app"),
 ]

@@ -1,12 +1,17 @@
 from rest_framework import viewsets
-from .models import Blog
+from datetime import timezone, datetime
+from .models import Blog, E2BRunOutput, BlogCodeRecipe
 from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from app.e2b_runner import run_code_project
-from app.schemas import BlogCodeRecipe, LanguageEnum, CodeFile
-from .models import E2BRunOutput, BlogCodeRecipe as BCR
+from app.schemas import BlogCodeRecipeLLM, LanguageEnum, CodeFile
+from .models import E2BRunOutput, BlogCodeRecipe
 from rest_framework import status
+from app.blog_checker_main import (
+    load_docs_from_cache_or_scrape,
+    get_blog_code_recipes_with_ai,
+)
 
 
 class BlogSerializer(serializers.ModelSerializer):
@@ -23,7 +28,7 @@ class E2BRunOutputSerializer(serializers.ModelSerializer):
 
 class BlogCodeRecipeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = BCR
+        model = BlogCodeRecipe
         fields = "__all__"
 
 
@@ -55,11 +60,27 @@ class BlogViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["post"], url_path="analyze")
     def analyze(self, request, *args, **kwargs):
         url = request.data.get("url")
+
         blog = Blog.objects.get(url=url)
-        print(blog)
+        print(f"YAYA {blog}")
         if not blog.url:
             raise serializers.ValidationError("Blog URL is required")
 
+        blog_loaded_docs = load_docs_from_cache_or_scrape(blog.url)
+        blog_content = blog_loaded_docs[0].page_content
+        print(blog_content)
+        code_recipes = get_blog_code_recipes_with_ai(blog_post_content=blog_content)
+        print(code_recipes)
+        for code_recipe in code_recipes:
+            BlogCodeRecipe.objects.get_or_create(
+                title=code_recipe.title,
+                published_at=datetime.now(tz=timezone.utc),
+                description=code_recipe.description,
+                language=code_recipe.language,
+                code_content=code_recipe.model_dump_json(),
+                success_criteria=code_recipe.success_criteria,
+                entrypoint=code_recipe.entrypoint,
+            )
         # call LLM loop to generate code recipes
         # loop through each code recipe, save it in DB and run it in e2b.
         # save the output for each code recipe.

@@ -1,14 +1,14 @@
 from e2b_code_interpreter import CodeInterpreter, ProcessOutput
 from dotenv import load_dotenv
 import os
-from .schemas import BlogCodeRecipe, LanguageEnum
+from app.schemas import BlogCodeRecipeLLM, LanguageEnum
 
 load_dotenv()
 
 WORK_DIR = "/home/user"
 
 
-def run_code_project(blog_code_recipe: BlogCodeRecipe) -> ProcessOutput:
+def run_code_project(blog_code_recipe: BlogCodeRecipeLLM) -> ProcessOutput:
     with CodeInterpreter(
         template="base", api_key=os.getenv("E2B_API_KEY")
     ) as code_interpreter:

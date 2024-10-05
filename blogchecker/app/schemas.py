@@ -49,7 +49,7 @@ class CodeRecipeDescriptions(BaseModel):
         return "\n\n".join(str(recipe) for recipe in self.recipes)
 
 
-class BlogCodeRecipe(BaseModel):
+class BlogCodeRecipeLLM(BaseModel):
     title: str = Field(..., description="The title of an individual code recipe")
     published_at: datetime = Field(
         ..., description="The published at of the technical blog post."

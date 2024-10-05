@@ -6,10 +6,10 @@ import hashlib
 from typing import List, Dict
 from langchain_community.document_loaders import FireCrawlLoader
 from langchain_core.documents import Document
-from llms import model4o
-from e2b_runner import run_code_project
-from schemas import IsBlogPostTechnical, BlogCodeRecipe, CodeRecipeDescriptions
-from prompts import (
+from app.llms import model4o
+from app.e2b_runner import run_code_project
+from app.schemas import IsBlogPostTechnical, BlogCodeRecipeLLM, CodeRecipeDescriptions
+from app.prompts import (
     extract_all_code_recipes_prompt,
     extract_code_metadata_prompt,
     extract_is_blog_post_technical_prompt,
@@ -21,6 +21,7 @@ import tiktoken
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 load_dotenv()
+
 
 def num_tokens_from_string(string: str, model_name: str) -> int:
     """Calculate the number of tokens in a string based on the model's encoding.
@@ -36,6 +37,7 @@ def num_tokens_from_string(string: str, model_name: str) -> int:
     num_tokens = len(encoding.encode(string))
     return num_tokens
 
+
 def get_hashed_filename(url: str) -> str:
     """Generate a hashed filename for the given URL.
 
@@ -47,9 +49,8 @@ def get_hashed_filename(url: str) -> str:
     """
     return hashlib.md5(url.encode()).hexdigest() + ".json"
 
-def load_docs_from_cache_or_scrape(
-    url: str, cache_folder: str, model_name: str
-) -> List[Document]:
+
+def load_docs_from_cache_or_scrape(url: str) -> List[Document]:
     """Load documents from cache if available, otherwise scrape using FireCrawlLoader and save to cache.
     Adds token count as metadata to each document.
 
@@ -61,6 +62,8 @@ def load_docs_from_cache_or_scrape(
     Returns:
         List[Document]: The loaded documents with token count metadata.
     """
+    model_name: str = "gpt-4o"
+    cache_folder = "./data/cache"
     os.makedirs(cache_folder, exist_ok=True)
     hashed_filename = get_hashed_filename(url)
     cache_file_path = os.path.join(cache_folder, hashed_filename)
@@ -83,14 +86,17 @@ def load_docs_from_cache_or_scrape(
 
     return docs
 
-def update_env_file(blog_code_recipe: BlogCodeRecipe, env_content: str) -> None:
+
+def update_env_file(blog_code_recipe: BlogCodeRecipeLLM, env_content: str) -> None:
     """Update the .env file content in the blog code recipe with the provided environment content.
 
     Args:
         blog_code_recipe (BlogCodeRecipe): The blog code recipe containing the .env file.
         env_content (str): The environment content to update the .env file with.
     """
-    env_dict: Dict[str, str] = dict(line.split("=") for line in env_content.strip().split("\n"))
+    env_dict: Dict[str, str] = dict(
+        line.split("=") for line in env_content.strip().split("\n")
+    )
 
     for code_file in blog_code_recipe.code:
         if code_file.filepath == ".env":
@@ -115,7 +121,8 @@ def update_env_file(blog_code_recipe: BlogCodeRecipe, env_content: str) -> None:
             code_file.content = "\n".join(updated_env_lines)
             break
 
-def get_blog_code_recipes_with_ai(blog_post_content: str) -> List[BlogCodeRecipe]:
+
+def get_blog_code_recipes_with_ai(blog_post_content: str) -> List[BlogCodeRecipeLLM]:
     """Extract code recipes from a blog post using AI models.
 
     Args:
@@ -125,7 +132,7 @@ def get_blog_code_recipes_with_ai(blog_post_content: str) -> List[BlogCodeRecipe
         List[BlogCodeRecipe]: The extracted code recipes.
     """
     extract_tech_deets_model = model4o.with_structured_output(IsBlogPostTechnical)
-    extract_code_deets_model = model4o.with_structured_output(BlogCodeRecipe)
+    extract_code_deets_model = model4o.with_structured_output(BlogCodeRecipeLLM)
     first_pass_details_chain = (
         extract_is_blog_post_technical_prompt | extract_tech_deets_model
     )
@@ -153,7 +160,10 @@ def get_blog_code_recipes_with_ai(blog_post_content: str) -> List[BlogCodeRecipe
 
     return code_details
 
-def check_code_recipe_with_e2b(input_code_recipe: BlogCodeRecipe, env_content: str) -> None:
+
+def check_code_recipe_with_e2b(
+    input_code_recipe: BlogCodeRecipeLLM, env_content: str
+) -> None:
     """Check the code recipe by running it with e2b.
 
     Args:
@@ -166,4 +176,3 @@ def check_code_recipe_with_e2b(input_code_recipe: BlogCodeRecipe, env_content: s
     logger.info(f"Exit Code: {result.exit_code}")
     logger.info(f"Standard Output: {result.stdout}")
     logger.info(f"Standard Error: {result.stderr}")
-    logger.info("\n" * 3)

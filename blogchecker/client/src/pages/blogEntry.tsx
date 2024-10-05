@@ -5,15 +5,7 @@ import rehypeRaw from "rehype-raw";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useParams, useNavigate } from "react-router-dom";
-import removeMarkdown from "remove-markdown";
-import {
-  Loader2,
-  CopyIcon,
-  CheckIcon,
-  Twitter,
-  Megaphone,
-  Mail,
-} from "lucide-react";
+import { Loader2, Twitter, Megaphone, Mail } from "lucide-react";
 
 import {
   Card,
@@ -27,9 +19,13 @@ import LeftSidebar from "@/sidebar";
 interface BlogPost {
   id: string;
   url: string;
-  title: string;
-  content: string;
+  is_valid: boolean;
+  is_public: boolean;
+  last_check_timestamp: string | null;
   created_at: string;
+  updated_at: string;
+  e2b_run_outputs: unknown[]; // You might want to define a more specific type for this
+  blog_code_recipes: unknown[]; // You might want to define a more specific type for this
 }
 
 interface AnalyzedBlogPost {
@@ -128,11 +124,7 @@ export default function BlogEntry() {
         const blogData = await blogResponse.json();
         console.log("Blog data:", blogData);
 
-        const analyzedBlogData = blogData.analyzed_blog_post;
-        console.log("Analyzed blog data:", analyzedBlogData);
-
         setBlogPost(blogData);
-        setAnalyzedBlogPost(analyzedBlogData);
       } catch (error) {
         console.error("Error fetching blog data:", error);
         setError("Failed to fetch blog data. Please try again.");
@@ -143,30 +135,6 @@ export default function BlogEntry() {
 
     fetchBlogData();
   }, [params.id]);
-
-  const copyToClipboard = () => {
-    if (analyzedBlogPost) {
-      navigator.clipboard.writeText(analyzedBlogPost.improved_content);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const shareOnTwitter = () => {
-    if (analyzedBlogPost && blogPost) {
-      const tweetText = encodeURIComponent(
-        removeMarkdown(
-          `Check out this blog post: ${blogPost.title}\n${analyzedBlogPost.summary.slice(0, 140)}...`,
-        ),
-      );
-      const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(blogPost.url)}`;
-      window.open(tweetUrl, "_blank");
-    }
-  };
-
-  const handleGoBack = () => {
-    navigate(-1);
-  };
 
   console.log(
     "Current state - blogPost:",
@@ -198,22 +166,11 @@ export default function BlogEntry() {
         <aside className="w-64 flex-shrink-0 h-full overflow-y-auto">
           <LeftSidebar />
         </aside>
-        <Card className="flex-grow">
-          <CardHeader>
-            <CardTitle>Error</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-red-500">{error}</p>
-            <Button onClick={handleGoBack} className="mt-4">
-              Go Back
-            </Button>
-          </CardContent>
-        </Card>
       </div>
     );
   }
 
-  if (!blogPost || !analyzedBlogPost) {
+  if (!blogPost) {
     console.log("No blog post or analyzed blog post data");
     return (
       <div className="flex container mx-auto py-10">
@@ -238,7 +195,7 @@ export default function BlogEntry() {
         <div className="flex justify-between">
           <div className="flex justify-start">
             <CardHeader>
-              <CardTitle>{blogPost.title}</CardTitle>
+              <CardTitle>{blogPost.url}</CardTitle>
               <CardDescription>
                 Published: {new Date(blogPost.created_at).toLocaleString()}
               </CardDescription>
@@ -248,28 +205,10 @@ export default function BlogEntry() {
             <Button
               variant="outline"
               size="lg"
-              className="mt-2 mr-2 text-accent hover:text-accent-foreground"
-              onClick={shareOnTwitter}
-            >
-              <Twitter className="h-4 w-4 mr-2" />
-              <span>Tweet</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="mt-2 mr-2 text-accent hover:text-accent-foreground"
+              className="mt-2 mr-2 text-primary hover:text-accent-foreground"
             >
               <Mail className="h-4 w-4 mr-2" />
-              Email
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="mt-2 mr-2 text-accent hover:text-accent-foreground"
-              onClick={() => window.open(blogPost.url, "_blank")}
-            >
-              <Megaphone className="h-4 w-4 mr-2" />
-              View Original
+              JIRA
             </Button>
           </div>
         </div>
@@ -277,7 +216,7 @@ export default function BlogEntry() {
           <div className="flex space-x-4 h-[calc(100vh-300px)]">
             <div className="flex-1 flex flex-col">
               <h2 className="text-xl font-semibold mb-2 text-center">
-                Original Content
+                Blog Code Recipe
               </h2>
               <Card className="flex-grow overflow-hidden">
                 <ScrollArea className="h-full p-4">
@@ -286,35 +225,7 @@ export default function BlogEntry() {
                     rehypePlugins={[rehypeRaw]}
                     components={components}
                   >
-                    {blogPost.content}
-                  </ReactMarkdown>
-                </ScrollArea>
-              </Card>
-            </div>
-            <div className="flex-1 flex flex-col">
-              <h2 className="text-xl font-semibold mb-2 text-center">
-                Improved Content
-              </h2>
-              <Card className="flex-grow overflow-hidden relative border border-primary">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="absolute top-2 right-2 z-10"
-                  onClick={copyToClipboard}
-                >
-                  {copied ? (
-                    <CheckIcon className="h-4 w-4" />
-                  ) : (
-                    <CopyIcon className="h-4 w-4" />
-                  )}
-                </Button>
-                <ScrollArea className="h-full p-4">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw]}
-                    components={components}
-                  >
-                    {analyzedBlogPost.improved_content}
+                    {blogPost.blog_code_recipe}
                   </ReactMarkdown>
                 </ScrollArea>
               </Card>

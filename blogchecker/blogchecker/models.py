@@ -60,7 +60,13 @@ class E2BRunOutput(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     # New field to link to BlogPost
-    blog = models.ForeignKey("Blog", on_delete=models.CASCADE, related_name="e2b_runs")
+    blog_code_recipe = models.ForeignKey(
+        "BlogCodeRecipe",
+        on_delete=models.CASCADE,
+        related_name="e2b_runs",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return f"E2B Run: {self.url} ({self.created_at})"

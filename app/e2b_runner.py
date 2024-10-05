@@ -35,7 +35,7 @@ def run_code_project(blog_code_recipe: BlogCodeRecipe) -> ProcessOutput:
             ENTRYPOINT = f"npx ts-node {blog_code_recipe.entrypoint}"
 
         output: ProcessOutput = code_interpreter.process.start_and_wait(
-            f"cd {WORK_DIR} && {ENTRYPOINT}"
+            f"cd {WORK_DIR} && export $(grep -v '^#' .env | xargs) && {ENTRYPOINT}"
         )
 
         return output

@@ -69,7 +69,7 @@ class E2BRunOutput(models.Model):
     )
 
     def __str__(self):
-        return f"E2B Run: {self.url} ({self.created_at})"
+        return f"E2B Run: {self.title} ({self.created_at})"
 
     class Meta:
         ordering = ["-created_at"]

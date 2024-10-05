@@ -5,7 +5,8 @@ import rehypeRaw from "rehype-raw";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useParams, useNavigate } from "react-router-dom";
-import { Loader2, Twitter, Megaphone, Mail } from "lucide-react";
+import { Loader2, Twitter, Megaphone, Mail, Badge } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 import {
   Card,
@@ -24,81 +25,167 @@ interface BlogPost {
   last_check_timestamp: string | null;
   created_at: string;
   updated_at: string;
-  e2b_run_outputs: unknown[]; // You might want to define a more specific type for this
-  blog_code_recipes: unknown[]; // You might want to define a more specific type for this
+  e2b_run_outputs: E2BRunOutput[];
+  blog_code_recipes: BlogCodeRecipe[];
 }
 
-interface AnalyzedBlogPost {
+interface BlogCodeRecipe {
   id: string;
-  improved_content: string;
-  summary: string;
-  created_at: string;
+  title: string;
+  description: string;
+  language: string;
+  success_criteria: string;
+  entrypoint: string;
+  code_content: [];
 }
 
-const components = {
-  h1: ({ ...props }) => (
-    <h1
-      className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-3xl"
-      {...props}
-    />
-  ),
-  h2: ({ ...props }) => (
-    <h2
-      className="mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
-      {...props}
-    />
-  ),
-  h3: ({ ...props }) => (
-    <h3
-      className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight"
-      {...props}
-    />
-  ),
-  p: ({ ...props }) => (
-    <p className="leading-7 [&:not(:first-child)]:mt-6" {...props} />
-  ),
-  a: ({ ...props }) => (
-    <a
-      className="font-medium text-accent underline underline-offset-4"
-      target="_blank"
-      {...props}
-    />
-  ),
-  blockquote: ({ ...props }) => (
-    <blockquote className="mt-6 border-l-2 pl-6 italic" {...props} />
-  ),
-  ul: ({ ...props }) => (
-    <ul className="my-6 ml-6 list-disc [&>li]:mt-2" {...props} />
-  ),
-  table: ({ ...props }) => (
-    <div className="my-6 w-full overflow-y-auto">
-      <table className="w-full" {...props} />
+interface E2BRunOutput {
+  id: number;
+  title: string;
+  published_at: string;
+  description: string;
+  language: string;
+  success_criteria: string;
+  entrypoint: string;
+  code_content: [];
+  stdout: string;
+  stderr: string;
+  exit_code: number;
+  error: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// const components = {
+//   h1: ({ ...props }) => (
+//     <h1
+//       className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-3xl"
+//       {...props}
+//     />
+//   ),
+//   h2: ({ ...props }) => (
+//     <h2
+//       className="mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
+//       {...props}
+//     />
+//   ),
+//   h3: ({ ...props }) => (
+//     <h3
+//       className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight"
+//       {...props}
+//     />
+//   ),
+//   p: ({ ...props }) => (
+//     <p className="leading-7 [&:not(:first-child)]:mt-6" {...props} />
+//   ),
+//   a: ({ ...props }) => (
+//     <a
+//       className="font-medium text-accent underline underline-offset-4"
+//       target="_blank"
+//       {...props}
+//     />
+//   ),
+//   blockquote: ({ ...props }) => (
+//     <blockquote className="mt-6 border-l-2 pl-6 italic" {...props} />
+//   ),
+//   ul: ({ ...props }) => (
+//     <ul className="my-6 ml-6 list-disc [&>li]:mt-2" {...props} />
+//   ),
+//   table: ({ ...props }) => (
+//     <div className="my-6 w-full overflow-y-auto">
+//       <table className="w-full" {...props} />
+//     </div>
+//   ),
+//   th: ({ ...props }) => (
+//     <th
+//       className="border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right"
+//       {...props}
+//     />
+//   ),
+//   td: ({ ...props }) => (
+//     <td
+//       className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right"
+//       {...props}
+//     />
+//   ),
+// };
+
+export function CodeRecipeCards(data: BlogPost) {
+  if (!data) {
+    return <div>No data available</div>;
+  }
+  console.log("SLEVMA", data);
+  return (
+    <div className="">
+      {data.blog_code_recipes.map((recipe, index) => (
+        <CodeRecipeCard
+          key={recipe.id}
+          recipe={recipe}
+          runOutput={data.e2b_run_outputs[index]}
+        />
+      ))}
     </div>
-  ),
-  th: ({ ...props }) => (
-    <th
-      className="border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right"
-      {...props}
-    />
-  ),
-  td: ({ ...props }) => (
-    <td
-      className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right"
-      {...props}
-    />
-  ),
-};
+  );
+}
+function CodeRecipeCard({
+  recipe,
+  runOutput,
+}: {
+  recipe: CodeRecipe;
+  runOutput: E2BRunOutput;
+}) {
+  const [activeTab, setActiveTab] = useState("summary");
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>{recipe.title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="summary">Summary</TabsTrigger>
+            <TabsTrigger value="stderr">stderr</TabsTrigger>
+            <TabsTrigger value="stdout">stdout</TabsTrigger>
+          </TabsList>
+          <TabsContent value="summary" className="space-y-4">
+            <div className="grid grid-cols-2 gap-2">
+              <div>Language:</div>
+              <div>{recipe.language}</div>
+              <div>Success:</div>
+              <div>
+                <Badge variant={runOutput.error ? "destructive" : "default"}>
+                  {runOutput.error ? "Failed" : "Success"}
+                </Badge>
+              </div>
+              <div>Exit Code:</div>
+              <div>{runOutput.exit_code}</div>
+              <div>Entrypoint:</div>
+              <div>{recipe.entrypoint}</div>
+            </div>
+          </TabsContent>
+          <TabsContent value="stderr">
+            <pre className="whitespace-pre-wrap text-sm">
+              {runOutput.stderr}
+            </pre>
+          </TabsContent>
+          <TabsContent value="stdout">
+            <pre className="whitespace-pre-wrap text-sm">
+              {runOutput.stdout}
+            </pre>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function BlogEntry() {
   console.log("BlogEntry component rendered");
   const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
-  const [analyzedBlogPost, setAnalyzedBlogPost] =
-    useState<AnalyzedBlogPost | null>(null);
-  const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const params = useParams();
-  const navigate = useNavigate();
 
   console.log("BlogEntry rendered, params:", params);
 
@@ -135,17 +222,6 @@ export default function BlogEntry() {
 
     fetchBlogData();
   }, [params.id]);
-
-  console.log(
-    "Current state - blogPost:",
-    blogPost,
-    "analyzedBlogPost:",
-    analyzedBlogPost,
-    "loading:",
-    loading,
-    "error:",
-    error,
-  );
 
   if (loading) {
     return (
@@ -212,26 +288,7 @@ export default function BlogEntry() {
             </Button>
           </div>
         </div>
-        <CardContent className="pt-5">
-          <div className="flex space-x-4 h-[calc(100vh-300px)]">
-            <div className="flex-1 flex flex-col">
-              <h2 className="text-xl font-semibold mb-2 text-center">
-                Blog Code Recipe
-              </h2>
-              <Card className="flex-grow overflow-hidden">
-                <ScrollArea className="h-full p-4">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw]}
-                    components={components}
-                  >
-                    {blogPost.blog_code_recipe}
-                  </ReactMarkdown>
-                </ScrollArea>
-              </Card>
-            </div>
-          </div>
-        </CardContent>
+        <CodeRecipeCards {...blogPost} />
       </Card>
     </div>
   );

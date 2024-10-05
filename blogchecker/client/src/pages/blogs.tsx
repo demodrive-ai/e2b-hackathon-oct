@@ -281,7 +281,9 @@ export default function BlogPosts() {
               <TableBody>
                 {blogPosts.map((post) => (
                   <TableRow key={post.id}>
-                    <TableCell>{post.url}</TableCell>
+                    <TableCell onClick={() => viewResults(post.id)}>
+                      {post.url}
+                    </TableCell>
                     <TableCell>
                       {post.created_at ? formatDate(post.created_at) : "N/A"}
                     </TableCell>

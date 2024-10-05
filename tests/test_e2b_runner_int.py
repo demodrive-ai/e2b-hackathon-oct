@@ -2,7 +2,7 @@ import os
 import pytest
 from dotenv import load_dotenv
 from app.e2b_runner import run_code_project
-from app.schema import BlogCodeProject, LanguageEnum, CodeFile
+from app.schemas import BlogCodeRecipe, LanguageEnum, CodeFile
 
 # Load environment variables
 load_dotenv()
@@ -16,7 +16,7 @@ def e2b_api_key():
 @pytest.mark.integration
 def test_run_python_project(e2b_api_key):
     print(e2b_api_key)
-    python_project = BlogCodeProject(
+    python_project = BlogCodeRecipe(
         title="Python Test",
         published_at="2023-01-01T00:00:00Z",
         description="A Python test",
@@ -24,8 +24,14 @@ def test_run_python_project(e2b_api_key):
         success_criteria="Test passes",
         entrypoint="main.py",
         code=[
-            CodeFile(filepath="main.py", content="print('Hello from Python!')"),
-            CodeFile(filepath="requirements.txt", content=""),
+            CodeFile(
+                filepath="main.py",
+                content="print('Hello from Python!')",
+                language=LanguageEnum.PYTHON,
+            ),
+            CodeFile(
+                filepath="requirements.txt", content="", language=LanguageEnum.OTHER
+            ),
         ],
     )
 
@@ -38,7 +44,7 @@ def test_run_python_project(e2b_api_key):
 
 @pytest.mark.integration
 def test_run_python_yaml_project(e2b_api_key):
-    python_yaml_project = BlogCodeProject(
+    python_yaml_project = BlogCodeRecipe(
         title="Python YAML Test",
         published_at="2023-01-01T00:00:00Z",
         description="A Python test to fetch and validate YAML",
@@ -63,8 +69,13 @@ try:
 except yaml.YAMLError:
     print("Invalid YAML")
 """,
+                language=LanguageEnum.PYTHON,
             ),
-            CodeFile(filepath="requirements.txt", content="pyyaml\nrequests"),
+            CodeFile(
+                filepath="requirements.txt",
+                content="pyyaml\nrequests",
+                language=LanguageEnum.OTHER,
+            ),
         ],
     )
 
@@ -75,60 +86,9 @@ except yaml.YAMLError:
     assert result.stderr == ""
 
 
-# @pytest.mark.integration
-# def test_run_javascript_project(e2b_api_key):
-#     js_project = BlogCodeProject(
-#         title="JavaScript Test",
-#         published_at="2023-01-01T00:00:00Z",
-#         description="A JavaScript test",
-#         language=LanguageEnum.JAVASCRIPT,
-#         success_criteria="Test passes",
-#         entrypoint="index.js",
-#         code=[
-#             CodeFile(
-#                 filepath="index.js", content="console.log('Hello from JavaScript!');"
-#             ),
-#             CodeFile(filepath="package.json", content='{"dependencies":{}}'),
-#         ],
-#     )
-
-#     result = run_code_project(js_project)
-
-#     assert result.exit_code == 0
-#     assert "Hello from JavaScript!" in result.stdout
-#     assert result.stderr == ""
-
-
-# @pytest.mark.integration
-# def test_run_typescript_project(e2b_api_key):
-#     ts_project = BlogCodeProject(
-#         title="TypeScript Test",
-#         published_at="2023-01-01T00:00:00Z",
-#         description="A TypeScript test",
-#         language=LanguageEnum.TYPESCRIPT,
-#         success_criteria="Test passes",
-#         entrypoint="index.ts",
-#         code=[
-#             CodeFile(
-#                 filepath="index.ts", content="console.log('Hello from TypeScript!');"
-#             ),
-#             CodeFile(
-#                 filepath="package.json",
-#                 content='{"dependencies":{"typescript":"^4.5.4"}}',
-#             ),
-#         ],
-#     )
-
-#     result = run_code_project(ts_project)
-
-#     assert result.exit_code == 0
-#     assert "Hello from TypeScript!" in result.stdout
-#     assert result.stderr == ""
-
-
 @pytest.mark.integration
 def test_run_project_with_error(e2b_api_key):
-    error_project = BlogCodeProject(
+    error_project = BlogCodeRecipe(
         title="Error Test",
         published_at="2023-01-01T00:00:00Z",
         description="A test with an error",
@@ -137,9 +97,13 @@ def test_run_project_with_error(e2b_api_key):
         entrypoint="main.py",
         code=[
             CodeFile(
-                filepath="main.py", content="raise Exception('Intentional error')"
+                filepath="main.py",
+                content="raise Exception('Intentional error')",
+                language=LanguageEnum.PYTHON,
             ),
-            CodeFile(filepath="requirements.txt", content=""),
+            CodeFile(
+                filepath="requirements.txt", content="", language=LanguageEnum.OTHER
+            ),
         ],
     )
 

@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from app.e2b_runner import run_code_project
-from app.schema import BlogCodeProject, LanguageEnum, CodeFile
+from app.schemas import BlogCodeRecipe, LanguageEnum, CodeFile
 from e2b_code_interpreter import ProcessOutput
 
 
@@ -12,8 +12,8 @@ def mock_code_interpreter():
 
 
 @pytest.fixture
-def sample_blog_code_project():
-    return BlogCodeProject(
+def sample_blog_code_recipe():
+    return BlogCodeRecipe(
         title="Test Project",
         published_at="2023-01-01T00:00:00Z",
         description="A test project",
@@ -21,20 +21,28 @@ def sample_blog_code_project():
         success_criteria="Test passes",
         entrypoint="main.py",
         code=[
-            CodeFile(filepath="main.py", content="print('Hello, World!')"),
-            CodeFile(filepath="requirements.txt", content="pytest==7.3.1"),
+            CodeFile(
+                filepath="main.py",
+                content="print('Hello, World!')",
+                language=LanguageEnum.PYTHON,
+            ),
+            CodeFile(
+                filepath="requirements.txt",
+                content="pytest==7.3.1",
+                language=LanguageEnum.OTHER,
+            ),
         ],
     )
 
 
-def test_run_code_project_python(mock_code_interpreter, sample_blog_code_project):
+def test_run_code_project_python(mock_code_interpreter, sample_blog_code_recipe):
     mock_instance = MagicMock()
     mock_code_interpreter.return_value.__enter__.return_value = mock_instance
 
     expected_output = ProcessOutput(stdout="Hello, World!\n", stderr="", exit_code=0)
     mock_instance.process.start_and_wait.return_value = expected_output
 
-    result = run_code_project(sample_blog_code_project)
+    result = run_code_project(sample_blog_code_recipe)
 
     assert result == expected_output
     mock_instance.filesystem.write.assert_called_with(
@@ -49,7 +57,7 @@ def test_run_code_project_python(mock_code_interpreter, sample_blog_code_project
 
 
 def test_run_code_project_javascript(mock_code_interpreter):
-    js_project = BlogCodeProject(
+    js_recipe = BlogCodeRecipe(
         title="JS Test",
         published_at="2023-01-01T00:00:00Z",
         description="A JavaScript test",
@@ -57,8 +65,16 @@ def test_run_code_project_javascript(mock_code_interpreter):
         success_criteria="Test passes",
         entrypoint="index.js",
         code=[
-            CodeFile(filepath="index.js", content="console.log('Hello, World!');"),
-            CodeFile(filepath="package.json", content='{"dependencies":{}}'),
+            CodeFile(
+                filepath="index.js",
+                content="console.log('Hello, World!');",
+                language=LanguageEnum.JAVASCRIPT,
+            ),
+            CodeFile(
+                filepath="package.json",
+                content='{"dependencies":{}}',
+                language=LanguageEnum.OTHER,
+            ),
         ],
     )
 
@@ -68,7 +84,7 @@ def test_run_code_project_javascript(mock_code_interpreter):
     expected_output = ProcessOutput(stdout="Hello, World!\n", stderr="", exit_code=0)
     mock_instance.process.start_and_wait.return_value = expected_output
 
-    result = run_code_project(js_project)
+    result = run_code_project(js_recipe)
 
     assert result == expected_output
     mock_instance.filesystem.write.assert_called_with(
@@ -76,12 +92,12 @@ def test_run_code_project_javascript(mock_code_interpreter):
     )
     mock_instance.process.start_and_wait.assert_any_call("cd /opt/app && npm install")
     mock_instance.process.start_and_wait.assert_called_with(
-        "cd /opt/app && javascript index.js"
+        "cd /opt/app && node index.js"
     )
 
 
 def test_run_code_project_typescript(mock_code_interpreter):
-    ts_project = BlogCodeProject(
+    ts_recipe = BlogCodeRecipe(
         title="TS Test",
         published_at="2023-01-01T00:00:00Z",
         description="A TypeScript test",
@@ -89,8 +105,16 @@ def test_run_code_project_typescript(mock_code_interpreter):
         success_criteria="Test passes",
         entrypoint="index.ts",
         code=[
-            CodeFile(filepath="index.ts", content="console.log('Hello, World!');"),
-            CodeFile(filepath="package.json", content='{"dependencies":{}}'),
+            CodeFile(
+                filepath="index.ts",
+                content="console.log('Hello, World!');",
+                language=LanguageEnum.TYPESCRIPT,
+            ),
+            CodeFile(
+                filepath="package.json",
+                content='{"dependencies":{}}',
+                language=LanguageEnum.OTHER,
+            ),
         ],
     )
 
@@ -100,7 +124,7 @@ def test_run_code_project_typescript(mock_code_interpreter):
     expected_output = ProcessOutput(stdout="Hello, World!\n", stderr="", exit_code=0)
     mock_instance.process.start_and_wait.return_value = expected_output
 
-    result = run_code_project(ts_project)
+    result = run_code_project(ts_recipe)
 
     assert result == expected_output
     mock_instance.filesystem.write.assert_called_with(
@@ -108,18 +132,18 @@ def test_run_code_project_typescript(mock_code_interpreter):
     )
     mock_instance.process.start_and_wait.assert_any_call("cd /opt/app && npm install")
     mock_instance.process.start_and_wait.assert_called_with(
-        "cd /opt/app && typescript index.ts"
+        "cd /opt/app && npx ts-node index.ts"
     )
 
 
-def test_run_code_project_error(mock_code_interpreter, sample_blog_code_project):
+def test_run_code_project_error(mock_code_interpreter, sample_blog_code_recipe):
     mock_instance = MagicMock()
     mock_code_interpreter.return_value.__enter__.return_value = mock_instance
 
     expected_output = ProcessOutput(stdout="", stderr="Error occurred", exit_code=1)
     mock_instance.process.start_and_wait.return_value = expected_output
 
-    result = run_code_project(sample_blog_code_project)
+    result = run_code_project(sample_blog_code_recipe)
 
     assert result == expected_output
     assert result.exit_code == 1

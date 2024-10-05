@@ -30,6 +30,7 @@ ipdb = "^0.13.13"
 firecrawl-py = "^1.2.4"
 django = "^5.1.1"
 django-environ = "^0.11.2"
+pytest = "^8.3.3"
 
 
 [build-system]
@@ -66,3 +67,11 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]

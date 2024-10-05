@@ -1,13 +1,8 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status, serializers
 from datetime import timezone, datetime
-from .models import Blog, E2BRunOutput, BlogCodeRecipe
-from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from app.e2b_runner import run_code_project
-from app.schemas import BlogCodeRecipe, LanguageEnum
-from .models import E2BRunOutput, BlogCodeRecipe as BCR, Blog
-from rest_framework import status
+from .models import E2BRunOutput, BlogCodeRecipe, Blog
 from app.blog_checker_main import (
     load_docs_from_cache_or_scrape,
     get_blog_code_recipes_with_ai,
@@ -89,7 +84,7 @@ class BlogViewSet(viewsets.ModelViewSet):
                 logger.info(f"Blog code recipe {blog_code_recipe}")
                 logger.info(f"Stored {code_recipe.title}")
                 env_content = get_env_keys_as_string(
-                    "/Users/nehiljain/code/e2b-hackathon-oct/.env"
+                    "/Users/selvampalanimalai/projects/e2b-hackathon-oct/.env"
                 )
                 e2b_output = check_code_recipe_with_e2b(
                     code_recipe, env_content=env_content
@@ -101,20 +96,20 @@ class BlogViewSet(viewsets.ModelViewSet):
                     language=code_recipe.language,
                     success_criteria=code_recipe.success_criteria,
                     entrypoint=code_recipe.entrypoint,
-                    code_content=code_recipe.code,
+                    code_content=code_recipe.model_dump_json(),
                     stdout=e2b_output.stdout,
                     stderr=e2b_output.stderr,
                     exit_code=e2b_output.exit_code,
                     error=e2b_output.error,
                     blog_code_recipe=blog_code_recipe,
                 )
-                if e2b_output.exit_Code != 0:
+                if e2b_output.exit_code != 0:
                     all_succeeded = False
 
-            except Exception:
-                logger.error(f"Skipped {code_recipe.title}")
+            except Exception as e:
+                logger.error(f"Skipped {code_recipe.title} with error {e}")
 
             blog.is_valid = all_succeeded
             blog.save()
 
-        return Response({"status": "success", "output": blog})
+        return Response({"status": "success", "output": BlogSerializer(blog).data})

@@ -1,0 +1,21 @@
+{# This is base.html #}
+<html>
+
+<head>
+    {% load static %}
+    <!-- <link rel="icon" type="image/svg+xml" href="{% static 'logo.svg' %}" /> -->
+    <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+    <meta http-equiv="content-language" content="en-US" />
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link rel="stylesheet" href="{% static 'main.css' %}" />
+    {% block meta %} {%endblock %}
+</head>
+
+<body>
+    {% block header %} {% endblock %}
+    <div class="flex flex-col justify-center text-black">
+        {% block content %} {% endblock %}
+    </div>
+</body>
+
+</html>

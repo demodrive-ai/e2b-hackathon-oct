@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from app.e2b_runner import run_code_project
-from app.schemas import BlogCodeRecipe, LanguageEnum, CodeFile
+from blogchecker.app.e2b_runner import run_code_project
+from blogchecker.app.schemas import BlogCodeRecipe, LanguageEnum, CodeFile
 from e2b_code_interpreter import ProcessOutput
 
 

@@ -1,33 +1,42 @@
 from django.db import models
-from django.contrib.postgres.fields import JSONField
 from django.utils import timezone
+from django.db.models import JSONField
 
 
-class BlogPost(models.Model):
-    LANGUAGE_CHOICES = [
-        ("python", "Python"),
-        ("javascript", "JavaScript"),
-        ("typescript", "TypeScript"),
-        # Add more language choices as needed
-    ]
-
-    title = models.CharField(max_length=255)
-    content = models.TextField()
-    author = models.ForeignKey("auth.User", on_delete=models.CASCADE)
-    language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES)
+class Blog(models.Model):
+    # LANGUAGE_CHOICES = [
+    #     ("python", "Python"),
+    #     ("javascript", "JavaScript"),
+    #     ("typescript", "TypeScript"),
+    #     # Add more language choices as needed
+    # ]
+    url = models.URLField(unique=True, default="")
     is_valid = models.BooleanField(default=False)
-    is_public = models.BooleanField(default=False)
+    is_public = models.BooleanField(default=True)
     last_check_timestamp = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.title
+        return self.url
 
     class Meta:
         ordering = ["-created_at"]
         verbose_name = "Blog Post"
         verbose_name_plural = "Blog Posts"
+
+
+class BlogCodeRecipe(models.Model):
+    title = models.CharField(max_length=255)
+    published_at = models.DateTimeField()
+    description = models.TextField()
+    language = models.CharField(max_length=20)
+    code_content = JSONField()
+    success_criteria = models.TextField()
+    entrypoint = models.CharField(max_length=255)
+
+
+blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name="code_recipes")
 
 
 class E2BRunOutput(models.Model):
@@ -38,8 +47,6 @@ class E2BRunOutput(models.Model):
     language = models.CharField(max_length=20)
     success_criteria = models.TextField()
     entrypoint = models.CharField(max_length=255)
-
-    # Code content (stored as JSON)
     code_content = JSONField()
 
     # ProcessOutput fields
@@ -52,8 +59,11 @@ class E2BRunOutput(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # New field to link to BlogPost
+    blog = models.ForeignKey("Blog", on_delete=models.CASCADE, related_name="e2b_runs")
+
     def __str__(self):
-        return f"E2B Run: {self.title} ({self.created_at})"
+        return f"E2B Run: {self.url} ({self.created_at})"
 
     class Meta:
         ordering = ["-created_at"]

@@ -5,11 +5,13 @@ from .schemas import BlogCodeRecipe, LanguageEnum
 
 load_dotenv()
 
-WORK_DIR = "/opt/"
+WORK_DIR = "/home/user"
 
 
 def run_code_project(blog_code_recipe: BlogCodeRecipe) -> ProcessOutput:
-    with CodeInterpreter(api_key=os.getenv("E2B_API_KEY")) as code_interpreter:
+    with CodeInterpreter(
+        template="base", api_key=os.getenv("E2B_API_KEY")
+    ) as code_interpreter:
         for code in blog_code_recipe.code:
             print(code)
             print("Hostname", code_interpreter.get_hostname())
@@ -17,12 +19,16 @@ def run_code_project(blog_code_recipe: BlogCodeRecipe) -> ProcessOutput:
                 f"{WORK_DIR}/{code.filepath}", code.content
             )
             print(r)
-
+        if ".env" not in code_interpreter.filesystem.list(WORK_DIR):
+            code_interpreter.filesystem.write(
+                f"{WORK_DIR}/.env",
+                "",
+            )
         print(code_interpreter.filesystem.list(WORK_DIR))
 
         if blog_code_recipe.language == LanguageEnum.PYTHON:
             code_interpreter.process.start_and_wait(
-                f"cd {WORK_DIR} && pip install -r requirements.txt"
+                f"cd {WORK_DIR} && export $(grep -v '^#' .env | xargs) && pip install -r requirements.txt"
             )
             ENTRYPOINT = f"python {blog_code_recipe.entrypoint}"
         elif blog_code_recipe.language == LanguageEnum.JAVASCRIPT:
@@ -37,5 +43,4 @@ def run_code_project(blog_code_recipe: BlogCodeRecipe) -> ProcessOutput:
         output: ProcessOutput = code_interpreter.process.start_and_wait(
             f"cd {WORK_DIR} && export $(grep -v '^#' .env | xargs) && {ENTRYPOINT}"
         )
-
         return output

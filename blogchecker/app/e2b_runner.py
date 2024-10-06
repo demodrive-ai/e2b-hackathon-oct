@@ -14,19 +14,19 @@ WORK_DIR = "/home/user"
 def run_code_project(
     blog_code_recipe: BlogCodeRecipeLLM, code_interpreter: CodeInterpreter
 ) -> ProcessOutput:
-    logger.info("Hostname E2B", code_interpreter.get_hostname())
+    print("Hostname E2B", code_interpreter.get_hostname())
     for code in blog_code_recipe.code:
-        logger.info("writing code file %s", code.model_dump_json())
+        print("writing code file", code.model_dump_json())
         r = code_interpreter.filesystem.write(
             f"{WORK_DIR}/{code.filepath}", code.content
         )
-        # logger.info("wrote code file %s", r)
+        print("wrote code file", r)
     # if ".env" not in code_interpreter.filesystem.list(WORK_DIR):
     #     code_interpreter.filesystem.write(
     #         f"{WORK_DIR}/.env",
     #         "",
     #     )
-    # logger.info("list files", code_interpreter.filesystem.list(WORK_DIR))
+    print("list files", code_interpreter.filesystem.list(WORK_DIR))
 
     if blog_code_recipe.language == LanguageEnum.PYTHON:
         code_interpreter.process.start_and_wait(

@@ -13,6 +13,7 @@ class Blog(models.Model):
     url = models.URLField(unique=True, default="")
     is_valid = models.BooleanField(default=False)
     is_public = models.BooleanField(default=True)
+    is_analyzed = models.BooleanField(default=False)
     last_check_timestamp = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -48,7 +49,7 @@ class E2BRunOutput(models.Model):
     success_criteria = models.TextField()
     entrypoint = models.CharField(max_length=255)
     code_content = JSONField()
-
+    code_interpreter_hostname = models.CharField(max_length=255, null=True, blank=True)
     # ProcessOutput fields
     stdout = models.TextField(blank=True)
     stderr = models.TextField(blank=True)

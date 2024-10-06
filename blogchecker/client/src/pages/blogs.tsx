@@ -32,6 +32,7 @@ export interface BlogPost {
   author: string;
   publish_date: string;
   created_at: string;
+  is_analyzed: boolean;
   url: string;
 }
 
@@ -297,7 +298,7 @@ export default function BlogPosts() {
                       </a>
                     </TableCell>
                     <TableCell>
-                      {analyzedPosts[post.id] ? (
+                      {post.is_analyzed ? (
                         <Button
                           variant="outline"
                           onClick={() => viewResults(post.id)}

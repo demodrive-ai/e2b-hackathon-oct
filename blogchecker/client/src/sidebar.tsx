@@ -34,13 +34,6 @@ export default function LeftSidebar() {
         <div>
           <div className="flex flex-row pl-2">
             <Link to="/">
-              <img
-                src="/static/logo.svg"
-                alt="Blog"
-                className="h-8 pr-2 w-auto"
-              />
-            </Link>
-            <Link to="/">
               <h2 className="mb-6 text-2xl font-bold">BlogChecker</h2>
             </Link>
           </div>

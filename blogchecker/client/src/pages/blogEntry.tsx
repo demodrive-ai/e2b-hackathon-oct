@@ -50,6 +50,7 @@ interface E2BRunOutput {
   code_content: string;
   stdout: string;
   stderr: string;
+  code_interpreter_hostname: string;
   exit_code: number;
   error: boolean;
   created_at: string;
@@ -129,6 +130,8 @@ function CodeRecipeCard({
             <div className="grid grid-cols-2 gap-2">
               <div>Language:</div>
               <div>{recipe.language}</div>
+              <div>Code Interpreter Hostname:</div>
+              <div>{runOutput.code_interpreter_hostname}</div>
               <div>Success:</div>
               <div>
                 <StatusIcon success={!runOutput.error} />

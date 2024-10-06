@@ -101,6 +101,7 @@ class BlogViewSet(viewsets.ModelViewSet):
                     language=code_recipe.language,
                     success_criteria=code_recipe.success_criteria,
                     entrypoint=code_recipe.entrypoint,
+                    code_interpreter_hostname=code_interpreter.get_hostname(),
                     code_content=code_recipe.model_dump_json(),
                     stdout=e2b_output.stdout,
                     stderr=e2b_output.stderr,
@@ -115,6 +116,7 @@ class BlogViewSet(viewsets.ModelViewSet):
                 logger.error(f"Skipped {code_recipe.title} with error {e}")
 
             blog.is_valid = all_succeeded
+            blog.is_analyzed = True
             blog.save()
 
         return Response({"status": "success", "output": BlogSerializer(blog).data})

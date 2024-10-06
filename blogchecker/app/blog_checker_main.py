@@ -14,6 +14,7 @@ from app.prompts import (
     extract_code_metadata_prompt,
     extract_is_blog_post_technical_prompt,
 )
+from e2b_code_interpreter import CodeInterpreter
 import logging
 import tiktoken
 
@@ -180,7 +181,9 @@ def get_env_keys_as_string(env_file_path: str) -> str:
 
 
 def check_code_recipe_with_e2b(
-    input_code_recipe: BlogCodeRecipeLLM, env_content: str
+    input_code_recipe: BlogCodeRecipeLLM,
+    env_content: str,
+    code_interpreter: CodeInterpreter,
 ) -> None:
     """Check the code recipe by running it with e2b.
 
@@ -190,7 +193,7 @@ def check_code_recipe_with_e2b(
     """
     update_env_file(input_code_recipe, env_content)
     logger.info(f"Running code project: {input_code_recipe.title}")
-    result = run_code_project(input_code_recipe)
+    result = run_code_project(input_code_recipe, code_interpreter)
     # logger.info(f"Exit Code: {result.exit_code}")
     # logger.info(f"Standard Output: {result.stdout}")
     # logger.info(f"Standard Error: {result.stderr}")

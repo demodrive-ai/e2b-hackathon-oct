@@ -10,6 +10,8 @@ from app.blog_checker_main import (
     check_code_recipe_with_e2b,
 )
 import logging
+import os
+from e2b_code_interpreter import CodeInterpreter
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +71,7 @@ class BlogViewSet(viewsets.ModelViewSet):
         blog_content = blog_loaded_docs[0].page_content
         code_recipes = get_blog_code_recipes_with_ai(blog_post_content=blog_content)
         all_succeeded = True
+        code_interpreter = CodeInterpreter(api_key=os.getenv("E2B_API_KEY"))
         for code_recipe in code_recipes:
             try:
                 blog_code_recipe = BlogCodeRecipe.objects.create(
@@ -87,7 +90,9 @@ class BlogViewSet(viewsets.ModelViewSet):
                     "/Users/selvampalanimalai/projects/e2b-hackathon-oct/.env"
                 )
                 e2b_output = check_code_recipe_with_e2b(
-                    code_recipe, env_content=env_content
+                    code_recipe,
+                    env_content=env_content,
+                    code_interpreter=code_interpreter,
                 )
                 E2BRunOutput.objects.get_or_create(
                     title=code_recipe.title,

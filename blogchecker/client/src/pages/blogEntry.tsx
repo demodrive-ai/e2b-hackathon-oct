@@ -36,7 +36,7 @@ interface BlogCodeRecipe {
   language: string;
   success_criteria: string;
   entrypoint: string;
-  code_content: [];
+  code_content: string;
 }
 
 interface E2BRunOutput {
@@ -47,7 +47,7 @@ interface E2BRunOutput {
   language: string;
   success_criteria: string;
   entrypoint: string;
-  code_content: [];
+  code_content: string;
   stdout: string;
   stderr: string;
   exit_code: number;
@@ -56,74 +56,51 @@ interface E2BRunOutput {
   updated_at: string;
 }
 
-// const components = {
-//   h1: ({ ...props }) => (
-//     <h1
-//       className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-3xl"
-//       {...props}
-//     />
-//   ),
-//   h2: ({ ...props }) => (
-//     <h2
-//       className="mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
-//       {...props}
-//     />
-//   ),
-//   h3: ({ ...props }) => (
-//     <h3
-//       className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight"
-//       {...props}
-//     />
-//   ),
-//   p: ({ ...props }) => (
-//     <p className="leading-7 [&:not(:first-child)]:mt-6" {...props} />
-//   ),
-//   a: ({ ...props }) => (
-//     <a
-//       className="font-medium text-accent underline underline-offset-4"
-//       target="_blank"
-//       {...props}
-//     />
-//   ),
-//   blockquote: ({ ...props }) => (
-//     <blockquote className="mt-6 border-l-2 pl-6 italic" {...props} />
-//   ),
-//   ul: ({ ...props }) => (
-//     <ul className="my-6 ml-6 list-disc [&>li]:mt-2" {...props} />
-//   ),
-//   table: ({ ...props }) => (
-//     <div className="my-6 w-full overflow-y-auto">
-//       <table className="w-full" {...props} />
-//     </div>
-//   ),
-//   th: ({ ...props }) => (
-//     <th
-//       className="border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right"
-//       {...props}
-//     />
-//   ),
-//   td: ({ ...props }) => (
-//     <td
-//       className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right"
-//       {...props}
-//     />
-//   ),
-// };
+import { Check, X } from "lucide-react";
+
+interface StatusIconProps {
+  success: boolean;
+}
+
+export function StatusIcon({ success = true }: StatusIconProps) {
+  return (
+    <div className="inline-flex items-center justify-center">
+      {success ? (
+        <div className="p-2 bg-green-700 rounded-full">
+          <Check
+            className="w-6 h-6 text-white"
+            strokeWidth={3}
+            aria-label="Success"
+          />
+        </div>
+      ) : (
+        <div className="p-2 bg-red-700 rounded-full">
+          <X
+            className="w-6 h-6 text-red-100"
+            strokeWidth={3}
+            aria-label="Failure"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function CodeRecipeCards(data: BlogPost) {
   if (!data) {
     return <div>No data available</div>;
   }
-  console.log("SLEVMA", data);
   return (
-    <div className="">
-      {data.blog_code_recipes.map((recipe, index) => (
-        <CodeRecipeCard
-          key={recipe.id}
-          recipe={recipe}
-          runOutput={data.e2b_run_outputs[index]}
-        />
-      ))}
+    <div className="flex flex-col gap-4">
+      {data.blog_code_recipes.map((recipe, index) =>
+        data.e2b_run_outputs[index] ? (
+          <CodeRecipeCard
+            key={recipe.id}
+            recipe={recipe}
+            runOutput={data.e2b_run_outputs[index]}
+          />
+        ) : null,
+      )}
     </div>
   );
 }
@@ -154,9 +131,7 @@ function CodeRecipeCard({
               <div>{recipe.language}</div>
               <div>Success:</div>
               <div>
-                <Badge variant={runOutput.error ? "destructive" : "default"}>
-                  {runOutput.error ? "Failed" : "Success"}
-                </Badge>
+                <StatusIcon success={!runOutput.error} />
               </div>
               <div>Exit Code:</div>
               <div>{runOutput.exit_code}</div>
@@ -278,6 +253,9 @@ export default function BlogEntry() {
             </CardHeader>
           </div>
           <div className="flex justify-end mt-2">
+            <div className="mt-2 mr-2">
+              <StatusIcon success={blogPost.is_valid} />
+            </div>
             <Button
               variant="outline"
               size="lg"

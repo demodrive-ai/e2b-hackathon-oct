@@ -45,7 +45,7 @@ class BlogViewSet(viewsets.ModelViewSet):
 
         e2b_run_outputs = E2BRunOutput.objects.filter(
             blog_code_recipe__in=blog_code_recipes
-        )
+        ).order_by("exit_code")
 
         result = BlogSerializer(blog).data
         result["e2b_run_outputs"] = [

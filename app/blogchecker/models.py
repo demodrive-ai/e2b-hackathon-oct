@@ -4,12 +4,6 @@ from django.db.models import JSONField
 
 
 class Blog(models.Model):
-    # LANGUAGE_CHOICES = [
-    #     ("python", "Python"),
-    #     ("javascript", "JavaScript"),
-    #     ("typescript", "TypeScript"),
-    #     # Add more language choices as needed
-    # ]
     url = models.URLField(unique=True, default="")
     is_valid = models.BooleanField(default=False)
     is_public = models.BooleanField(default=True)
@@ -41,21 +35,11 @@ class BlogCodeRecipe(models.Model):
 
 
 class E2BRunOutput(models.Model):
-    # BlogCodeProject fields
-    title = models.CharField(max_length=255)
-    published_at = models.DateTimeField()
-    description = models.TextField()
-    language = models.CharField(max_length=20)
-    success_criteria = models.TextField()
-    entrypoint = models.CharField(max_length=255)
-    code_content = JSONField()
-    code_interpreter_hostname = models.CharField(max_length=255, null=True, blank=True)
     # ProcessOutput fields
     stdout = models.TextField(blank=True)
     stderr = models.TextField(blank=True)
     exit_code = models.IntegerField(null=True)
     error = models.BooleanField(default=False)
-
     # Metadata
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -70,7 +54,7 @@ class E2BRunOutput(models.Model):
     )
 
     def __str__(self):
-        return f"E2B Run: {self.title} ({self.created_at})"
+        return f"E2B Run: {self.blog_code_recipe} ({self.created_at})"
 
     class Meta:
         ordering = ["-created_at"]

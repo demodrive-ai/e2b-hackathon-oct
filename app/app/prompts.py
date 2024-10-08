@@ -1,7 +1,8 @@
 from langchain_core.prompts import ChatPromptTemplate
 
 
-extract_is_blog_post_technical_prompt = ChatPromptTemplate.from_template("""
+extract_is_blog_post_technical_prompt = ChatPromptTemplate.from_template(
+    """
 You are a software engineer. Given a blog post, you are going to answer the following questions:
 
 1. Is this blog post technical?
@@ -10,10 +11,12 @@ You are a software engineer. Given a blog post, you are going to answer the foll
 ## Blog post:
 
 {blog_post}
-""")
+"""
+)
 
 
-extract_all_code_recipes_prompt = ChatPromptTemplate.from_template("""
+extract_all_code_recipes_prompt = ChatPromptTemplate.from_template(
+    """
 You are a software engineer. Given a blog post, you are going to answer the following questions:
 
 What are all the code recipes/how-to guides in this blog post?
@@ -29,10 +32,12 @@ What are all the code recipes/how-to guides in this blog post?
 ## Blog post:
 
 {blog_post}
-""")
+"""
+)
 
 
-extract_code_metadata_prompt = ChatPromptTemplate.from_template("""
+extract_code_metadata_prompt = ChatPromptTemplate.from_template(
+    """
 You are a software engineer. Given the following blog post, you are going to extract the details of the code project from the blog post.
 
 Look at the description of the code recipe you need to extract below.
@@ -49,8 +54,10 @@ Look at the description of the code recipe you need to extract below.
 5. For all python recipes it should have requirements.txt, .env for environment variables, main.py for all the self-contained code and command to run the project. Carefully make sure the requirements.txt and .env are complete. Somethings this can be tricky.
 6. If it is a javascript/typescript project then it should have package.json, .env for environment variables, index.js for all the self-contained code and command to run the project.
 7. Review all the code files in the recipes to make sure nothing is missing wholistically.
+8. Expect the shell environment to contain the necessary API Keys. Dont hardcode any keys in the code.
 
 # Blog post:
 
 {blog_post}
-""")
+"""
+)

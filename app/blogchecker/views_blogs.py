@@ -79,7 +79,7 @@ class BlogViewSet(viewsets.ModelViewSet):
                     published_at=datetime.now(tz=timezone.utc),
                     description=code_recipe.description,
                     language=code_recipe.language,
-                    code_content=code_recipe.code,
+                    code_content=code_recipe.model_dump_json(),
                     success_criteria=code_recipe.success_criteria,
                     entrypoint=code_recipe.entrypoint,
                     blog=blog,

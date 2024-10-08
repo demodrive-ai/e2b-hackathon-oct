@@ -771,6 +771,20 @@ docs = ["furo (>=2021.8.17b43,<2021.9.dev0)", "sphinx (>=3.5.0)", "sphinx-notfou
 testing = ["coverage[toml] (>=5.0a4)", "pytest (>=4.6.11)"]
 
 [[package]]
+name = "django-jsoneditor"
+version = "0.2.4"
+description = "Django JSON Editor"
+optional = false
+python-versions = "*"
+files = [
+    {file = "django-jsoneditor-0.2.4.tar.gz", hash = "sha256:1d3dfca28f047feefa6ebc6f9541179eb815fb459b006faf3fb8d0fb2197d2df"},
+    {file = "django_jsoneditor-0.2.4-py2.py3-none-any.whl", hash = "sha256:d7a639a7251e376126b5be64ea588c925c7a40d45e0e212f66ef475d2f0f90bb"},
+]
+
+[package.dependencies]
+packaging = "*"
+
+[[package]]
 name = "djangorestframework"
 version = "3.15.2"
 description = "Web APIs for Django, made easy."
@@ -4665,4 +4679,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "94d167c65c97b411a643a9e4aa3812bd97e54342555ecec209b0da786a0aef11"
+content-hash = "f2be563dafa0b31d531e775e05c15a63680e5161d9b11ea97df271edfb1af68f"

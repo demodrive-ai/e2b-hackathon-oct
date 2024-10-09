@@ -21,6 +21,7 @@ from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 from .views_blogs import BlogViewSet
 from .views_env import EnvironmentView
+from .admin_views import custom_admin_view
 
 router = DefaultRouter()
 router.register(r"blogs", BlogViewSet)
@@ -34,6 +35,11 @@ def app(request):
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path(
+        "admin/blogcoderecipe/",
+        custom_admin_view,
+        name="admin_blog_code_recipe_view",
+    ),
     path("api/", include(router.urls)),
     path("api/env/", EnvironmentView.as_view(), name="env"),
     re_path(r"^(?!admin/|auth|callback|logout|api/).*", app, name="app"),

@@ -79,7 +79,9 @@ class BlogViewSet(viewsets.ModelViewSet):
                     published_at=datetime.now(tz=timezone.utc),
                     description=code_recipe.description,
                     language=code_recipe.language,
-                    code_content=code_recipe.model_dump_json(),
+                    code_content=[
+                        code_file.model_dump() for code_file in code_recipe.code
+                    ],
                     success_criteria=code_recipe.success_criteria,
                     entrypoint=code_recipe.entrypoint,
                     blog=blog,
@@ -95,17 +97,10 @@ class BlogViewSet(viewsets.ModelViewSet):
                     code_interpreter=code_interpreter,
                 )
                 E2BRunOutput.objects.get_or_create(
-                    title=code_recipe.title,
-                    published_at=code_recipe.published_at,
-                    description=code_recipe.description,
-                    language=code_recipe.language,
-                    success_criteria=code_recipe.success_criteria,
-                    entrypoint=code_recipe.entrypoint,
-                    code_interpreter_hostname=code_interpreter.get_hostname(),
-                    code_content=code_recipe.model_dump_json(),
                     stdout=e2b_output.stdout,
                     stderr=e2b_output.stderr,
                     exit_code=e2b_output.exit_code,
+                    code_interpreter_hostname=e2b_output.code_interpreter_hostname,
                     error=e2b_output.error,
                     blog_code_recipe=blog_code_recipe,
                 )
@@ -120,3 +115,27 @@ class BlogViewSet(viewsets.ModelViewSet):
             blog.save()
 
         return Response({"status": "success", "output": BlogSerializer(blog).data})
+
+
+class BlogCodeRecipeViewSet(viewsets.ModelViewSet):
+    queryset = BlogCodeRecipe.objects.all()
+    serializer_class = BlogCodeRecipeSerializer
+
+    @action(detail=True, methods=["post"], url_path="rerun")
+    def rerun(self, request, *args, **kwargs):
+        blog_code_recipe = self.get_object()
+        e2b_output = check_code_recipe_with_e2b(
+            blog_code_recipe,
+            env_content=get_env_keys_as_string(
+                "/Users/selvampalanimalai/projects/e2b-hackathon-oct/.env"
+            ),
+        )
+        E2BRunOutput.objects.get_or_create(
+            stdout=e2b_output.stdout,
+            stderr=e2b_output.stderr,
+            exit_code=e2b_output.exit_code,
+            code_interpreter_hostname=e2b_output.code_interpreter_hostname,
+            error=e2b_output.error,
+            blog_code_recipe=blog_code_recipe,
+        )
+        return Response({"status": "success"})

@@ -4,6 +4,8 @@ from django.db import models
 from jsoneditor.forms import JSONEditor
 
 from .models import E2BRunOutput, Blog, BlogCodeRecipe
+from tinymce.widgets import TinyMCE
+from tinymce.models import HTMLField
 
 
 class BlogCodeRecipeAdmin(admin.ModelAdmin):
@@ -19,6 +21,7 @@ class BlogCodeRecipeAdmin(admin.ModelAdmin):
     list_filter = ["blog"]
     formfield_overrides = {
         models.JSONField: {"widget": JSONEditor},
+        HTMLField: {"widget": TinyMCE},
     }
 
 
@@ -33,6 +36,7 @@ class E2BRunOutputAdmin(admin.ModelAdmin):
     list_filter = ["blog_code_recipe__blog"]
     formfield_overrides = {
         models.JSONField: {"widget": JSONEditor},
+        HTMLField: {"widget": TinyMCE},
     }
 
     def blog(self, obj):

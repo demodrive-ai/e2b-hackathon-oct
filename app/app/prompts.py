@@ -55,6 +55,7 @@ Look at the description of the code recipe you need to extract below.
 6. If it is a javascript/typescript project then it should have package.json, .env for environment variables, index.js for all the self-contained code and command to run the project.
 7. Review all the code files in the recipes to make sure nothing is missing wholistically.
 8. Expect the shell environment to contain the necessary API Keys. Dont hardcode any keys in the code.
+9. Make sure all necessary python built-in libraries are imported at the top of the file.
 
 # Blog post:
 

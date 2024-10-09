@@ -17,6 +17,7 @@ from app.prompts import (
 from e2b_code_interpreter import CodeInterpreter
 import logging
 import tiktoken
+from e2b_code_interpreter import ProcessOutput
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -180,11 +181,15 @@ def get_env_keys_as_string(env_file_path: str) -> str:
     return env_content
 
 
+class ProcessOutputWithHostname(ProcessOutput):
+    code_interpreter_hostname: str
+
+
 def check_code_recipe_with_e2b(
     input_code_recipe: BlogCodeRecipeLLM,
     env_content: str,
     code_interpreter: CodeInterpreter,
-) -> None:
+) -> ProcessOutputWithHostname:
     """Check the code recipe by running it with e2b.
 
     Args:
@@ -193,8 +198,10 @@ def check_code_recipe_with_e2b(
     """
     update_env_file(input_code_recipe, env_content)
     logger.info(f"Running code project: {input_code_recipe.title}")
+
     result = run_code_project(input_code_recipe, code_interpreter)
-    # logger.info(f"Exit Code: {result.exit_code}")
-    # logger.info(f"Standard Output: {result.stdout}")
-    # logger.info(f"Standard Error: {result.stderr}")
-    return result
+
+    new_result = ProcessOutputWithHostname(
+        **result.model_dump(), code_interpreter_hostname=code_interpreter.get_hostname()
+    )
+    return new_result

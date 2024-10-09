@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.db.models import JSONField
+from tinymce.models import HTMLField
 
 
 class Blog(models.Model):
@@ -26,7 +26,7 @@ class BlogCodeRecipe(models.Model):
     published_at = models.DateTimeField()
     description = models.TextField()
     language = models.CharField(max_length=20)
-    code_content = JSONField()
+    code_content = HTMLField()
     success_criteria = models.TextField()
     entrypoint = models.CharField(max_length=255)
     blog = models.ForeignKey(
@@ -39,6 +39,7 @@ class E2BRunOutput(models.Model):
     stdout = models.TextField(blank=True)
     stderr = models.TextField(blank=True)
     exit_code = models.IntegerField(null=True)
+    code_interpreter_hostname = models.CharField(max_length=255, blank=True)
     error = models.BooleanField(default=False)
     # Metadata
     created_at = models.DateTimeField(default=timezone.now)

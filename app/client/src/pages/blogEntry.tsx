@@ -1,13 +1,9 @@
 import { useState, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useParams, useNavigate } from "react-router-dom";
-import { Loader2, Twitter, Megaphone, Mail, Badge } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Loader2, Mail } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-
+import { CodeBlock } from "@/components/ui/code-block";
 import {
   Card,
   CardContent,
@@ -109,7 +105,7 @@ function CodeRecipeCard({
   recipe,
   runOutput,
 }: {
-  recipe: CodeRecipe;
+  recipe: BlogCodeRecipe;
   runOutput: E2BRunOutput;
 }) {
   const [activeTab, setActiveTab] = useState("summary");
@@ -131,10 +127,14 @@ function CodeRecipeCard({
               <div>Language:</div>
               <div>{recipe.language}</div>
               <div>Code Interpreter Hostname:</div>
-              <div>{runOutput.code_interpreter_hostname}</div>
+              <div>
+                <CodeBlock
+                  content={`e2b sandbox cn ${runOutput.code_interpreter_hostname.split(".e2b.dev")[0]}`}
+                />
+              </div>
               <div>Success:</div>
               <div>
-                <StatusIcon success={!runOutput.error} />
+                <StatusIcon success={!runOutput.exit_code} />
               </div>
               <div>Exit Code:</div>
               <div>{runOutput.exit_code}</div>

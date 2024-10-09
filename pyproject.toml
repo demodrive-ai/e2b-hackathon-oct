@@ -36,6 +36,7 @@ tdqm = "^0.0.1"
 psycopg2-binary = "^2.9.9"
 djangorestframework = "^3.15.2"
 django-jsoneditor = "^0.2.4"
+django-tinymce = "^4.1.0"
 
 
 [build-system]
